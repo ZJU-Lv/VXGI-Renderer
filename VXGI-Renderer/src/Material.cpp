@@ -139,8 +139,8 @@ void Material::bind(Shader& shader)
 {
 	shader.bind();
 
-	shader.setUniform1i("Shininess", shininess);
-	shader.setUniform1i("Opacity", opacity);
+	shader.setUniform1f("Shininess", shininess);
+	shader.setUniform1f("Opacity", opacity);
 
 	glActiveTexture(GL_TEXTURE0);
 	glBindTexture(GL_TEXTURE_2D, diffuseTexture.textureID);

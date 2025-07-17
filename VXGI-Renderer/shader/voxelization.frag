@@ -6,13 +6,15 @@ layout(rgba8) writeonly uniform image3D VoxelTexture;
 uniform sampler2D DiffuseTexture;
 uniform sampler2DShadow ShadowMap;
 
+uniform float Opacity;
+
 uniform vec3 ToLightDirection;
 uniform int VoxelDimensions;
 
 in GeomData
 {
 	vec3 normal;
-    vec2 texCood;
+    vec2 texCoord;
     flat int axis;            // 1 represent X, 2 represent Y, 3 represent Z
     vec4 positionLightSpace;
 } geomOut;
@@ -37,15 +39,15 @@ void main()
 	{
 		voxelPos.x = fragmentPos.x;
 		voxelPos.y = fragmentPos.y;
-	    voxelPos.z = VoxelDimensions - fragmentPos.y - 1;
+	    voxelPos.z = VoxelDimensions - fragmentPos.z - 1;
 	}
 
-	vec4 materialColor = texture(DiffuseTexture, geomOut.texCood);
+	vec4 materialColor = texture(DiffuseTexture, geomOut.texCoord);
 
 	vec3 lightDir = normalize(ToLightDirection);
 	float cosTheta = max(0, dot(geomOut.normal, lightDir));
 
 	float visibility = texture(ShadowMap, vec3(geomOut.positionLightSpace.xy, (geomOut.positionLightSpace.z - 0.005) / geomOut.positionLightSpace.w));
 
-    imageStore(VoxelTexture, voxelPos, vec4(materialColor.rgb * cosTheta * visibility, materialColor.a));
+    imageStore(VoxelTexture, voxelPos, vec4(materialColor.rgb * cosTheta * visibility, Opacity));
 }

@@ -124,6 +124,18 @@ void Renderer::initializeVoxelTexture()
 	glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
 	glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 
+	// open anisotropic filtering
+	if (GLEW_EXT_texture_filter_anisotropic)
+	{
+		GLfloat maxAnisotropy;
+		glGetFloatv(GL_MAX_TEXTURE_MAX_ANISOTROPY_EXT, &maxAnisotropy);
+		glTexParameterf(GL_TEXTURE_3D, GL_TEXTURE_MAX_ANISOTROPY_EXT, maxAnisotropy);
+	}
+	else
+	{
+		std::cout << "Anisotropic filtering is NOT supported!" << std::endl;
+	}
+
 	int numVoxels = voxelTexture.size * voxelTexture.size * voxelTexture.size;
 	GLubyte* data = new GLubyte[numVoxels * 4];
 	for (int i = 0; i < numVoxels * 4; i++)

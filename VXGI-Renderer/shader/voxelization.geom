@@ -11,14 +11,14 @@ uniform mat4 ProjectiomFromZAxis;
 in VertexData
 {
     vec3 normal;
-    vec2 texCood;
+    vec2 texCoord;
     vec4 positionLightSpace;
 } vertexOut[];
 
 out GeomData
 {
     vec3 normal;
-    vec2 texCood;
+    vec2 texCoord;
     flat int axis;            // 1 represent X, 2 represent Y, 3 represent Z
     vec4 positionLightSpace;
 } geomOut;
@@ -54,7 +54,7 @@ void main()
     for(int i = 0; i < gl_in.length(); i++)
     {
         geomOut.normal = vertexOut[i].normal;
-        geomOut.texCood = vertexOut[i].texCood;
+        geomOut.texCoord = vertexOut[i].texCoord;
         geomOut.positionLightSpace = vertexOut[i].positionLightSpace;
         gl_Position = projectionMatrix * gl_in[i].gl_Position;
         EmitVertex();
