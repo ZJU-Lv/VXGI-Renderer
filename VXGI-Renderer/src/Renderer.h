@@ -14,6 +14,7 @@
 enum ShaderType {
 	SHADOW_MAP_SHADER,
 	VOXELIZATION_SHADER,
+	VOXEL_VISUALIZETION_SHADER,
 	RENDER_SHADER
 };
 
@@ -32,6 +33,9 @@ public:
 	static void keyCallback(GLFWwindow* window, int key, int scancode, int action, int mods);
 
 	void updateCamera(float delta = 0.1f);
+
+	bool renderVoxelModeOn() { return renderVoxelMode; }
+	void renderVoxels();
 
 	void render();
 
@@ -55,6 +59,8 @@ private:
 
 	Texture2D shadowMap;
 	Texture3D voxelTexture;
+
+	bool renderVoxelMode = false;
 
 	bool showDirect = true;
 	bool showIndirectDiffuse = true;

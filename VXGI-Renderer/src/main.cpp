@@ -65,6 +65,10 @@ int main()
 	std::filesystem::path voxelizationFrag = shaderDir / "voxelization.frag";
 	renderer.loadShader(VOXELIZATION_SHADER, voxelizationVert.string().c_str(), voxelizationFrag.string().c_str(), voxelizationGeom.string().c_str());
 
+	std::filesystem::path voxelVisualizationVert = shaderDir / "voxelVisualization.vert";
+	std::filesystem::path voxelVisualizationFrag = shaderDir / "voxelVisualization.frag";
+	renderer.loadShader(VOXEL_VISUALIZETION_SHADER, voxelVisualizationVert.string().c_str(), voxelVisualizationFrag.string().c_str());
+
 	std::filesystem::path renderVert = shaderDir / "render.vert";
 	std::filesystem::path renderFrag = shaderDir / "render.frag";
 	renderer.loadShader(RENDER_SHADER, renderVert.string().c_str(), renderFrag.string().c_str());
@@ -85,7 +89,11 @@ int main()
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 		
 		renderer.updateCamera();
-		renderer.render();
+
+		if(renderer.renderVoxelModeOn())
+			renderer.renderVoxels();
+		else
+			renderer.render();
 
 		glfwSwapBuffers(window);
 	}

@@ -215,6 +215,8 @@ void Renderer::keyCallback(GLFWwindow* window, int key, int scancode, int action
 		rendererPtr->showIndirectSpecular = !rendererPtr->showIndirectSpecular;
 	if (key == GLFW_KEY_4 && action == GLFW_PRESS)
 		rendererPtr->showAmbientOcculision = !rendererPtr->showAmbientOcculision;
+	if (key == GLFW_KEY_5 && action == GLFW_PRESS)
+		rendererPtr->renderVoxelMode = !rendererPtr->renderVoxelMode;
 }
 
 void Renderer::updateCamera(float delta)
@@ -250,6 +252,43 @@ void Renderer::updateCamera(float delta)
 		camera.moveUp(translationDelta);
 	if (glfwGetKey(window, GLFW_KEY_Q) == GLFW_PRESS)
 		camera.moveDown(translationDelta);
+}
+
+void Renderer::renderVoxels()
+{
+	glEnable(GL_CULL_FACE);
+	glEnable(GL_DEPTH_TEST);
+
+	glBindFramebuffer(GL_FRAMEBUFFER, 0);
+	glViewport(0, 0, width, height);
+
+	glClearColor(0, 0, 0, 1);
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+	shaders[VOXEL_VISUALIZETION_SHADER].bind();
+
+	// uniforms in vertex shader
+	shaders[VOXEL_VISUALIZETION_SHADER].setUniformMatrix4fv("ViewMatrix", camera.getViewMatrix());
+	shaders[VOXEL_VISUALIZETION_SHADER].setUniformMatrix4fv("ProjectionMatrix", camera.getProjectionMatrix());
+
+	// uniforms in fragment shader
+	glActiveTexture(GL_TEXTURE0 + 4);
+	glBindTexture(GL_TEXTURE_3D, voxelTexture.textureID);
+	shaders[RENDER_SHADER].setUniform1i("VoxelTexture", 4);
+
+	shaders[VOXEL_VISUALIZETION_SHADER].setUniform1i("VoxelDimensions", voxelDimensions);
+	shaders[VOXEL_VISUALIZETION_SHADER].setUniform1f("VoxelTotalSize", voxelTotalSize);
+
+	for (Mesh& mesh : meshes)
+	{
+		glm::mat4 modelMatrix = glm::scale(glm::mat4(1.0f), glm::vec3(mesh.scale));
+		
+		shaders[VOXEL_VISUALIZETION_SHADER].setUniformMatrix4fv("ModelMatrix", modelMatrix);
+
+		mesh.draw();
+	}
+
+	shaders[VOXEL_VISUALIZETION_SHADER].unbind();
 }
 
 void Renderer::render()
