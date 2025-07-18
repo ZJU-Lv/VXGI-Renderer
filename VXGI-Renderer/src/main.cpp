@@ -61,13 +61,14 @@ int main()
 	renderer.loadShader(SHADOW_MAP_SHADER, shadowMapVert.string().c_str(), shadowMapFrag.string().c_str());
 
 	std::filesystem::path voxelizationVert = shaderDir / "voxelization.vert";
-	std::filesystem::path voxelizationGeom = shaderDir / "voxelization.geom";
 	std::filesystem::path voxelizationFrag = shaderDir / "voxelization.frag";
+	std::filesystem::path voxelizationGeom = shaderDir / "voxelization.geom";
 	renderer.loadShader(VOXELIZATION_SHADER, voxelizationVert.string().c_str(), voxelizationFrag.string().c_str(), voxelizationGeom.string().c_str());
 
 	std::filesystem::path voxelVisualizationVert = shaderDir / "voxelVisualization.vert";
 	std::filesystem::path voxelVisualizationFrag = shaderDir / "voxelVisualization.frag";
-	renderer.loadShader(VOXEL_VISUALIZETION_SHADER, voxelVisualizationVert.string().c_str(), voxelVisualizationFrag.string().c_str());
+	std::filesystem::path voxelVisualizationGeom = shaderDir / "voxelVisualization.geom";
+	renderer.loadShader(VOXEL_VISUALIZETION_SHADER, voxelVisualizationVert.string().c_str(), voxelVisualizationFrag.string().c_str(), voxelVisualizationGeom.string().c_str());
 
 	std::filesystem::path renderVert = shaderDir / "render.vert";
 	std::filesystem::path renderFrag = shaderDir / "render.frag";
@@ -90,10 +91,11 @@ int main()
 		
 		renderer.updateCamera();
 
-		if(renderer.renderVoxelModeOn())
+		renderer.renderVoxels();
+		/*if(renderer.renderVoxelModeOn())
 			renderer.renderVoxels();
 		else
-			renderer.render();
+			renderer.render();*/
 
 		glfwSwapBuffers(window);
 	}

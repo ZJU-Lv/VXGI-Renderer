@@ -1,47 +1,28 @@
 #version 430 core
 
-in vec3 PositionWorld;
-
-out vec4 color;
-
 uniform sampler3D VoxelTexture;
 
 uniform int VoxelDimensions;
 uniform float VoxelTotalSize;
 
-vec3 worldToVoxelIndex(vec3 worldPosition)
-{
-    vec3 normalizedPos = (worldPosition / (VoxelTotalSize * 0.5)) * 0.5 + 0.5;
-    vec3 voxelIndex = normalizedPos * VoxelDimensions;
-    
-    return floor(voxelIndex);
-}
+in vec3 PositionWorld;
 
-bool isVoxelIndexValid(vec3 voxelIndex)
-{
-    return all(greaterThanEqual(voxelIndex, vec3(0.0))) && 
-           all(lessThan(voxelIndex, vec3(VoxelDimensions)));
-}
+out vec4 color;
 
-vec3 voxelIndexToTextureUV(vec3 voxelIndex)
+vec4 sampleFromVoxelTexture(vec3 worldPosition)
 {
-    vec3 textureUV = (voxelIndex + 0.5) / VoxelDimensions;
+    vec3 voxelTextureUV = worldPosition / (VoxelTotalSize * 0.5);
+    voxelTextureUV = voxelTextureUV * 0.5 + 0.5;
+    if(any(lessThan(voxelTextureUV, vec3(0.0))) || any(greaterThan(voxelTextureUV, vec3(1.0))))
+        return vec4(0.0, 0.0, 0.0, 0.0);    // out of range
     
-    return textureUV;
-}
-
-vec4 sampleVoxelByIndex(vec3 voxelIndex)
-{
-    if (!isVoxelIndexValid(voxelIndex))
-        return vec4(0.0, 0.0, 0.0, 0.0);
+    float BorderOffset = 0.5 / VoxelDimensions;
+    voxelTextureUV = clamp(voxelTextureUV, vec3(BorderOffset), vec3(1.0 - BorderOffset));
     
-    vec3 textureUV = (voxelIndex + 0.5) / VoxelDimensions;
-    return textureLod(VoxelTexture, textureUV, 0.0);
+    return textureLod(VoxelTexture, voxelTextureUV, 0.0);
 }
 
 void main()
 {
-    vec3 voxelIndex = worldToVoxelIndex(PositionWorld);
-
-    color = sampleVoxelByIndex(voxelIndex);
+    color = sampleFromVoxelTexture(PositionWorld);
 }

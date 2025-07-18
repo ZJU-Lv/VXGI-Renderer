@@ -256,6 +256,10 @@ void Renderer::updateCamera(float delta)
 
 void Renderer::renderVoxels()
 {
+	static GLuint emptyVAO = 0;
+	if (emptyVAO == 0)
+		glGenVertexArrays(1, &emptyVAO);
+
 	glEnable(GL_CULL_FACE);
 	glEnable(GL_DEPTH_TEST);
 
@@ -267,27 +271,21 @@ void Renderer::renderVoxels()
 
 	shaders[VOXEL_VISUALIZETION_SHADER].bind();
 
-	// uniforms in vertex shader
 	shaders[VOXEL_VISUALIZETION_SHADER].setUniformMatrix4fv("ViewMatrix", camera.getViewMatrix());
 	shaders[VOXEL_VISUALIZETION_SHADER].setUniformMatrix4fv("ProjectionMatrix", camera.getProjectionMatrix());
-
-	// uniforms in fragment shader
-	glActiveTexture(GL_TEXTURE0 + 4);
-	glBindTexture(GL_TEXTURE_3D, voxelTexture.textureID);
-	shaders[RENDER_SHADER].setUniform1i("VoxelTexture", 4);
 
 	shaders[VOXEL_VISUALIZETION_SHADER].setUniform1i("VoxelDimensions", voxelDimensions);
 	shaders[VOXEL_VISUALIZETION_SHADER].setUniform1f("VoxelTotalSize", voxelTotalSize);
 
-	for (Mesh& mesh : meshes)
-	{
-		glm::mat4 modelMatrix = glm::scale(glm::mat4(1.0f), glm::vec3(mesh.scale));
-		
-		shaders[VOXEL_VISUALIZETION_SHADER].setUniformMatrix4fv("ModelMatrix", modelMatrix);
+	glActiveTexture(GL_TEXTURE0 + 4);
+	glBindTexture(GL_TEXTURE_3D, voxelTexture.textureID);
+	shaders[VOXEL_VISUALIZETION_SHADER].setUniform1i("VoxelTexture", 4);
 
-		mesh.draw();
-	}
+	int numVoxels = voxelDimensions * voxelDimensions * voxelDimensions;
+	glBindVertexArray(emptyVAO);
+	glDrawArrays(GL_POINTS, 0, numVoxels);
 
+	glBindVertexArray(0);
 	shaders[VOXEL_VISUALIZETION_SHADER].unbind();
 }
 
