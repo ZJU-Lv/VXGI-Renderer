@@ -10,11 +10,14 @@ Renderer::Renderer(GLFWwindow* in_window, int in_width, int in_height, Camera in
 	shadowMap.width = 4096;
 	shadowMap.height = 4096;
 
+	shadowMapDepthTexture.width = shadowMap.width;
+	shadowMapDepthTexture.height = shadowMap.height;
+
 	voxelTexture.size = voxelDimensions;
 
 	toLightDirection = glm::vec3(-0.3, 0.9, -0.25);
 	glm::mat4 lightViewMatrix = glm::lookAt(toLightDirection, glm::vec3(0, 0, 0), glm::vec3(0, 1, 0));
-	glm::mat4 lightProjectionMatrix = glm::ortho<float>(-120, 120, -120, 120, -500, 500);
+	glm::mat4 lightProjectionMatrix = glm::ortho<float>(-100, 100, -100, 100, -150, 50);
 	lightViewProjectionMatrix = lightProjectionMatrix * lightViewMatrix;
 
 	glfwSetKeyCallback(in_window, keyCallback);
@@ -78,8 +81,16 @@ void Renderer::initializeShadowMap()
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_COMPARE_FUNC, GL_LEQUAL);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_COMPARE_MODE, GL_COMPARE_R_TO_TEXTURE);
 
-	glFramebufferTexture(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, shadowMap.textureID, 0);
-	glDrawBuffer(GL_NONE);
+	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, shadowMap.textureID, 0);
+	
+	glGenTextures(1, &shadowMapDepthTexture.textureID);
+	glBindTexture(GL_TEXTURE_2D, shadowMapDepthTexture.textureID);
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, shadowMapDepthTexture.width, shadowMapDepthTexture.height, 0, GL_RGBA, GL_UNSIGNED_BYTE, 0);
+
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+
+	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, shadowMapDepthTexture.textureID, 0);
 
 	if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
 	{
@@ -147,9 +158,9 @@ void Renderer::initializeVoxelTexture()
 
 	float size = voxelTotalSize;
 	glm::mat4 projectionMatrix = glm::ortho(-size * 0.5f, size * 0.5f, -size * 0.5f, size * 0.5f, size * 0.5f, size * 1.5f);
-	glm::mat4 projectiomFromXAxis = projectionMatrix * glm::lookAt(glm::vec3(size, 0, 0), glm::vec3(0, 0, 0), glm::vec3(0, 1, 0));
-	glm::mat4 projectiomFromYAxis = projectionMatrix * glm::lookAt(glm::vec3(0, size, 0), glm::vec3(0, 0, 0), glm::vec3(0, 0, -1));
-	glm::mat4 projectiomFromZAxis = projectionMatrix * glm::lookAt(glm::vec3(0, 0, size), glm::vec3(0, 0, 0), glm::vec3(0, 1, 0));
+	glm::mat4 projectionFromXAxis = projectionMatrix * glm::lookAt(glm::vec3(size, 0, 0), glm::vec3(0, 0, 0), glm::vec3(0, 1, 0));
+	glm::mat4 projectionFromYAxis = projectionMatrix * glm::lookAt(glm::vec3(0, size, 0), glm::vec3(0, 0, 0), glm::vec3(0, 0, -1));
+	glm::mat4 projectionFromZAxis = projectionMatrix * glm::lookAt(glm::vec3(0, 0, size), glm::vec3(0, 0, 0), glm::vec3(0, 1, 0));
 
 	/*-----------------draw to voxel texture-------------------*/
 	glDisable(GL_CULL_FACE);
@@ -162,9 +173,9 @@ void Renderer::initializeVoxelTexture()
 	shaders[VOXELIZATION_SHADER].bind();
 
 	// uniforms in geometry shader
-	shaders[VOXELIZATION_SHADER].setUniformMatrix4fv("ProjectiomFromXAxis", projectiomFromXAxis);
-	shaders[VOXELIZATION_SHADER].setUniformMatrix4fv("ProjectiomFromYAxis", projectiomFromYAxis);
-	shaders[VOXELIZATION_SHADER].setUniformMatrix4fv("ProjectiomFromZAxis", projectiomFromZAxis);
+	shaders[VOXELIZATION_SHADER].setUniformMatrix4fv("ProjectiomFromXAxis", projectionFromXAxis);
+	shaders[VOXELIZATION_SHADER].setUniformMatrix4fv("ProjectiomFromYAxis", projectionFromYAxis);
+	shaders[VOXELIZATION_SHADER].setUniformMatrix4fv("ProjectiomFromZAxis", projectionFromZAxis);
 
 	// uniforms in fragment shader
 	shaders[VOXELIZATION_SHADER].setUniform1i("VoxelDimensions", voxelDimensions);
@@ -277,9 +288,9 @@ void Renderer::renderVoxels()
 	shaders[VOXEL_VISUALIZETION_SHADER].setUniform1i("VoxelDimensions", voxelDimensions);
 	shaders[VOXEL_VISUALIZETION_SHADER].setUniform1f("VoxelTotalSize", voxelTotalSize);
 
-	glActiveTexture(GL_TEXTURE0 + 4);
+	glActiveTexture(GL_TEXTURE0 + 5);
 	glBindTexture(GL_TEXTURE_3D, voxelTexture.textureID);
-	shaders[VOXEL_VISUALIZETION_SHADER].setUniform1i("VoxelTexture", 4);
+	shaders[VOXEL_VISUALIZETION_SHADER].setUniform1i("VoxelTexture", 5);
 
 	int numVoxels = voxelDimensions * voxelDimensions * voxelDimensions;
 	glBindVertexArray(emptyVAO);
@@ -322,8 +333,12 @@ void Renderer::render()
 	shaders[RENDER_SHADER].setUniform1i("ShadowMap", 3);
 
 	glActiveTexture(GL_TEXTURE0 + 4);
+	glBindTexture(GL_TEXTURE_2D, shadowMapDepthTexture.textureID);
+	shaders[RENDER_SHADER].setUniform1i("ShadowMapDepthTexture", 4);
+
+	glActiveTexture(GL_TEXTURE0 + 5);
 	glBindTexture(GL_TEXTURE_3D, voxelTexture.textureID);
-	shaders[RENDER_SHADER].setUniform1i("VoxelTexture", 4);
+	shaders[RENDER_SHADER].setUniform1i("VoxelTexture", 5);
 
 	for (Mesh& mesh : meshes)
 	{

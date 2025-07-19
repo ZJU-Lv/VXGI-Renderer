@@ -1,7 +1,7 @@
 #version 430 core
 
 in vec3 PositionWorld;
-in vec4 PositionLightSpace;
+in vec3 PositionLightSpace;
 in vec2 texCoord;
 in vec3 NormalWorld;
 in vec3 TangentWorld;
@@ -21,6 +21,7 @@ uniform float Shininess;
 uniform float Opacity;
 
 uniform sampler2DShadow ShadowMap;
+uniform sampler2D ShadowMapDepthTexture;
 uniform sampler3D VoxelTexture;
 
 uniform int VoxelDimensions;
@@ -34,14 +35,87 @@ uniform int ShowAmbientOcculision;
 const float MaxDistance = 100.0;
 
 const int ConeNum = 6;
-vec3 ConeDirections[6] = vec3[]
-(vec3(0, 1, 0),
- vec3(0, 0.5, 0.866025),
- vec3(0.823639, 0.5, 0.267617),
- vec3(0.509037, 0.5, -0.700629),
- vec3(-0.509037, 0.5, -0.700629),
- vec3(-0.823639, 0.5, 0.267617));
+vec3 ConeDirections[6] = vec3[](
+    vec3(0, 1, 0),
+    vec3(0, 0.5, 0.866025),
+    vec3(0.823639, 0.5, 0.267617),
+    vec3(0.509037, 0.5, -0.700629),
+    vec3(-0.509037, 0.5, -0.700629),
+    vec3(-0.823639, 0.5, 0.267617)
+);
 float ConeWeights[6] = float[](0.25, 0.15, 0.15, 0.15, 0.15, 0.15);
+
+const int BlockerSearchSamples = 16;
+const int PCFSearchSamples = 16;
+vec2 poissonDisk[16] = vec2[](
+    vec2(-0.94201624, -0.39906216),
+    vec2(0.94558609, -0.76890725),
+    vec2(-0.09418410, -0.92938870),
+    vec2(0.34495938, 0.29387760),
+    vec2(-0.91588581, 0.45771432),
+    vec2(-0.81544232, -0.87912464),
+    vec2(-0.38277543, 0.27676845),
+    vec2(0.97484398, 0.75648379),
+    vec2(0.44323325, -0.97511554),
+    vec2(0.53742981, -0.47373420),
+    vec2(-0.26496911, -0.41893023),
+    vec2(0.79197514, 0.19090188),
+    vec2(-0.24188840, 0.99706507),
+    vec2(-0.81409955, 0.91437590),
+    vec2(0.19984126, 0.78641367),
+    vec2(0.14383161, -0.14100790)
+);
+
+float PCSS(vec3 lightSpacePos)
+{
+    vec3 shadowCoords = lightSpacePos;
+    if(shadowCoords.z > 1.0 || any(lessThan(shadowCoords.xy, vec2(0.0))) || any(greaterThan(shadowCoords.xy, vec2(1.0))))
+        return 1.0;    // out of range
+
+    float currentDepth = shadowCoords.z;
+
+    // find blocker depth
+    float blockerDepthSum = 0.0;
+    int blockerCount = 0;
+    float searchRadius = 0.002;
+    for(int i = 0; i < BlockerSearchSamples; i++)
+    {
+        vec2 offset = poissonDisk[i] * searchRadius;
+        vec2 sampleCoords = shadowCoords.xy + offset;
+        if(any(lessThan(sampleCoords, vec2(0.0))) || any(greaterThan(sampleCoords, vec2(1.0))))
+            continue;
+
+        float blockerDepth = texture(ShadowMapDepthTexture, sampleCoords).z;
+        if(texture(ShadowMap, vec3(sampleCoords, currentDepth - 0.005)) < 0.5)
+        {
+            blockerDepthSum += blockerDepth;
+            blockerCount++;
+        }
+    }
+
+    if(blockerCount == 0)
+        return 1.0;
+    else if(blockerCount == BlockerSearchSamples)
+        return 0.0;
+
+    // calculate PCF radius
+    float averageBlockerDepth = blockerDepthSum / float(blockerCount);
+    float PCFRadius = 0.005 * (currentDepth - averageBlockerDepth);
+
+    // PCF
+    float visibilitySum = 0.0;
+    for(int i = 0; i < PCFSearchSamples; i++)
+    {
+        vec2 offset = poissonDisk[i] * PCFRadius;
+        vec2 sampleCoords = shadowCoords.xy + offset;
+        if(any(lessThan(sampleCoords, vec2(0.0))) || any(greaterThan(sampleCoords, vec2(1.0))))
+            continue;
+
+        visibilitySum += texture(ShadowMap, vec3(sampleCoords, currentDepth - 0.005));
+    }
+
+    return visibilitySum / float(PCFSearchSamples);
+}
 
 bool isPositionInVoxelTexture(vec3 worldPosition)
 {
@@ -160,7 +234,8 @@ void main()
 
     vec4 materialColor = texture(DiffuseTexture, texCoord);
 
-    float visibility = texture(ShadowMap, vec3(PositionLightSpace.xy, (PositionLightSpace.z - 0.0005) / PositionLightSpace.w));
+    //float visibility = texture(ShadowMap, vec3(PositionLightSpace.xy, PositionLightSpace.z - 0.005));
+    float visibility = PCSS(PositionLightSpace);
 
     // direct diffuse light
     float cosTheta = max(0, dot(heightMapNormal, toLight));
@@ -184,6 +259,8 @@ void main()
 
     // gamma correction
     compositeColor = linearToSRGB(compositeColor);
+
+    //compositeColor = texture(ShadowMapDepthTexture, PositionLightSpace.xy).rgb;
 
     color = vec4(compositeColor, Opacity);
 }

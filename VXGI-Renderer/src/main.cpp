@@ -40,6 +40,7 @@ int main()
 		glfwTerminate();
 		return -1;
 	}
+	glEnable(GL_MULTISAMPLE);
 	/*--------------------initialize--------------------*/
 
 	/*------------------create renderer------------------*/
@@ -91,11 +92,10 @@ int main()
 		
 		renderer.updateCamera();
 
-		renderer.renderVoxels();
-		/*if(renderer.renderVoxelModeOn())
+		if(renderer.renderVoxelModeOn())
 			renderer.renderVoxels();
 		else
-			renderer.render();*/
+			renderer.render();
 
 		glfwSwapBuffers(window);
 	}

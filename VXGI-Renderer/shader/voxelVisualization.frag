@@ -22,7 +22,14 @@ vec4 sampleFromVoxelTexture(vec3 worldPosition)
     return textureLod(VoxelTexture, voxelTextureUV, 0.0);
 }
 
+vec3 linearToSRGB(vec3 linear)
+{
+    return pow(linear, vec3(1.0 / 2.2));
+}
+
 void main()
 {
     color = sampleFromVoxelTexture(PositionWorld);
+
+    color.rgb = linearToSRGB(color.rgb);
 }

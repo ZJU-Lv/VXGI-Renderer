@@ -7,7 +7,7 @@ layout(location = 3) in vec3 vertexTangent;
 layout(location = 4) in vec3 vertexBitangent;
 
 out vec3 PositionWorld;
-out vec4 PositionLightSpace;
+out vec3 PositionLightSpace;
 out vec2 texCoord;
 out vec3 NormalWorld;
 out vec3 TangentWorld;
@@ -24,8 +24,9 @@ void main()
 {
 	PositionWorld = (ModelMatrix * vec4(vertexPosition, 1)).xyz;
 
-	PositionLightSpace = LightModelViewProjectionMatrix * vec4(vertexPosition, 1);
-	PositionLightSpace.xyz = PositionLightSpace.xyz * 0.5 + 0.5;
+	vec4 posLightSpace = LightModelViewProjectionMatrix * vec4(vertexPosition, 1);
+	PositionLightSpace = posLightSpace.xyz / posLightSpace.w;
+	PositionLightSpace = PositionLightSpace * 0.5 + 0.5;
 
 	texCoord = vertexTexCoord;
 	NormalWorld = normalize((ModelMatrix * vec4(vertexNormal, 0)).xyz);

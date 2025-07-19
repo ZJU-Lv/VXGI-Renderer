@@ -58,6 +58,7 @@ private:
 	const float voxelTotalSize = 150.0f;
 
 	Texture2D shadowMap;
+	Texture2D shadowMapDepthTexture;
 	Texture3D voxelTexture;
 
 	bool renderVoxelMode = false;

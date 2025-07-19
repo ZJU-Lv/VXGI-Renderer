@@ -13,15 +13,17 @@ out VertexData
 {
     vec3 normal;
     vec2 texCoord;
-    vec4 positionLightSpace;
+    vec3 positionLightSpace;
 } vertOut;
 
 void main()
 {
     vertOut.normal = normalize(ModelMatrix * vec4(vertexNormal, 0)).xyz;
     vertOut.texCoord = vertexTexCoord;
-    vertOut.positionLightSpace = LightModelViewProjectionMatrix * vec4(vertexPosition, 1);
-	vertOut.positionLightSpace.xyz = vertOut.positionLightSpace.xyz * 0.5f + 0.5f;
+
+    vec4 posLightSpace = LightModelViewProjectionMatrix * vec4(vertexPosition, 1);
+    vertOut.positionLightSpace = posLightSpace.xyz / posLightSpace.w;
+	vertOut.positionLightSpace = vertOut.positionLightSpace * 0.5f + 0.5f;
 
     gl_Position = ModelMatrix * vec4(vertexPosition, 1);
 }

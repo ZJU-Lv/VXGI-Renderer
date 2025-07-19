@@ -12,7 +12,7 @@ in VertexData
 {
     vec3 normal;
     vec2 texCoord;
-    vec4 positionLightSpace;
+    vec3 positionLightSpace;
 } vertexOut[];
 
 out GeomData
@@ -20,7 +20,7 @@ out GeomData
     vec3 normal;
     vec2 texCoord;
     flat int axis;            // 1 represent X, 2 represent Y, 3 represent Z
-    vec4 positionLightSpace;
+    vec3 positionLightSpace;
 } geomOut;
 
 void main()
