@@ -9,13 +9,13 @@
 6. 在Visual Studio中，设置"Renderer"为启动项目。
 7. 编译运行。
 ## 操作指南
-运行程序后，通过"W""A""S""D""Q""E"键可以控制摄像机的前后左右上下移动。鼠标可以控制视角的转动。
-默认渲染全局光照模式。
-按下"1"键，控制打开/关闭直接光照；
-按下"2"键，控制打开/关闭间接漫反射光；
-按下"3"键，控制打开/关闭间接镜面反射光；
-按下"4"键，控制打开/关闭环境光遮蔽渲染模式，这种模式下场景的AO会作为颜色值渲染出来；
-按下"5"键，控制打开/关闭体素化渲染模式，这种模式下会渲染3D纹理存储的体素化结果。
+运行程序后，通过"W""A""S""D""Q""E"键可以控制摄像机的前后左右上下移动。鼠标可以控制视角的转动。  
+默认渲染全局光照模式。  
+按下"1"键，控制打开/关闭直接光照；  
+按下"2"键，控制打开/关闭间接漫反射光；  
+按下"3"键，控制打开/关闭间接镜面反射光；  
+按下"4"键，控制打开/关闭环境光遮蔽渲染模式，这种模式下场景的AO会作为颜色值渲染出来；  
+按下"5"键，控制打开/关闭体素化渲染模式，这种模式下会渲染3D纹理存储的体素化结果。  
 ## 场景演示
 1. 全局光照
 ![Demo1](images/Demo1.png)
@@ -33,4 +33,5 @@
 ![Voxelization](images/Voxelization.png)
 ## 参考文献
 [Interactive Indirect Illumination Using Voxel Cone Tracing](https://research.nvidia.com/sites/default/files/publications/GIVoxels-pg2011-authors.pdf)
+
 [Deferred Voxel Shading for Real Time Global Illumination](https://jose-villegas.github.io/post/deferred_voxel_shading/)
