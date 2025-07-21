@@ -31,6 +31,9 @@
 ![AO2](images/AO2.png)
 6. 体素化
 ![Voxelization](images/Voxelization.png)
+7. PCSS
+![PCSS1](images/PCSS1.png)
+![PCSS2](images/PCSS2.png)
 ## 参考文献
 [Interactive Indirect Illumination Using Voxel Cone Tracing](https://research.nvidia.com/sites/default/files/publications/GIVoxels-pg2011-authors.pdf)
 
