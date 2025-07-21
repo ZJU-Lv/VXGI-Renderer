@@ -1,4 +1,4 @@
-本项目是对经典全局光照算法VXGI(Voxel Global Illumination)的实现。全局光照的计算中包含了直接光照、间接漫反射光、间接镜面反射光三部分，其中间接光照的计算利用了3D纹理存储的场景体素化结构。同时本项目中还支持了环境光遮蔽(Ambient Occlusion)和PCSS(Percentage-Closer Soft Shadows)软阴影，具备不错的最终效果。
+本项目是对经典全局光照算法VXGI(Voxel Global Illumination)的实现。全局光照的计算中包含了直接光照、间接漫反射光、间接镜面反射光三部分，其中间接光照的计算利用了3D纹理存储的场景体素化结构。同时本项目中还支持了环境光遮蔽(Ambient Occlusion)和PCSS(Percentage-Closer Soft Shadows)软阴影，具体效果见后续场景演示。
 ## 如何运行
 本项目要求Windows操作系统下已安装Visual Studio和CMake。
 1. 通过git clone拉取仓库：https://github.com/ZJU-Lv/VXGI-Renderer.git
@@ -20,17 +20,23 @@
 1. 全局光照
 ![Demo1](images/Demo1.png)
 ![Demo2](images/Demo2.png)
+
 2. 直接光照
 ![DirectLight](images/DirectLight.png)
+
 3. 间接漫反射光
 ![DiffuseLight](images/DiffuseLight.png)
+
 4. 间接镜面反射光
 ![SpecularLight](images/SpecularLight.png)
+
 5. AO
 ![AO1](images/AO1.png)
 ![AO2](images/AO2.png)
+
 6. 体素化
 ![Voxelization](images/Voxelization.png)
+
 7. PCSS
 ![PCSS1](images/PCSS1.png)
 ![PCSS2](images/PCSS2.png)
