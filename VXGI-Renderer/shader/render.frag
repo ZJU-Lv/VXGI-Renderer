@@ -148,9 +148,9 @@ vec4 coneTrace(vec3 direction, float tanHalfAngle)
     float voxelUnitSize = VoxelTotalSize / VoxelDimensions;
     vec3 startPos = PositionWorld + direction * voxelUnitSize * 0.5; // start half a voxel away to avoid self occlusion
 
-    //vec4 startPosColor = sampleFromVoxelTexture(startPos, 0.0);
-    //if(startPosColor.a > 0.95)    // cone is occluded
-    //    return vec4(colorAccumulate, startPosColor.a);
+    //vec4 firstPosColor = sampleFromVoxelTexture(startPos + voxelUnitSize * direction, 0.0);
+    //if(firstPosColor.a > 0.95)    // cone is occluded
+    //    return vec4(colorAccumulate, firstPosColor.a);
 
     float distance = voxelUnitSize;
     float alpha = 0.0;
@@ -170,11 +170,9 @@ vec4 coneTrace(vec3 direction, float tanHalfAngle)
         colorAccumulate += weight * voxelColor.rgb;
         alpha += weight;
 
-        if(ShowAmbientOcculision > 0)
-        {
-            float occlusionContribution = voxelAlpha / (1.0 + 0.03 * distance);
-            occlusionAccumulate += (1 - occlusionAccumulate) * occlusionContribution;
-        }
+        // AO
+        float occlusionContribution = voxelAlpha / (1.0 + 0.03 * distance);
+        occlusionAccumulate += (1 - occlusionAccumulate) * occlusionContribution;
 
         distance += diameter * 0.5;
     }
@@ -254,13 +252,11 @@ void main()
 
     vec3 compositeColor = directDiffuseLight + (indirectDiffuseLight + indirectSpecularLight) * aoFactor;
 
-    if(ShowDirect < 1 && ShowIndirectDiffuse < 1 && ShowIndirectSpecular < 1)
+    if(ShowAmbientOcculision > 0)
         compositeColor = vec3(1.0) * aoFactor;
 
     // gamma correction
     compositeColor = linearToSRGB(compositeColor);
-
-    //compositeColor = texture(ShadowMapDepthTexture, PositionLightSpace.xy).rgb;
 
     color = vec4(compositeColor, Opacity);
 }

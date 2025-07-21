@@ -4,9 +4,9 @@
 layout (triangles) in;
 layout (triangle_strip, max_vertices = 3) out;
 
-uniform mat4 ProjectiomFromXAxis;
-uniform mat4 ProjectiomFromYAxis;
-uniform mat4 ProjectiomFromZAxis;
+uniform mat4 ProjectionFromXAxis;
+uniform mat4 ProjectionFromYAxis;
+uniform mat4 ProjectionFromZAxis;
 
 in VertexData
 {
@@ -38,17 +38,17 @@ void main()
     if(normalX > normalY && normalX > normalZ)
     {
         geomOut.axis = 1;
-        projectionMatrix = ProjectiomFromXAxis;
+        projectionMatrix = ProjectionFromXAxis;
     }
     else if(normalY > normalX && normalY > normalZ)
     {
         geomOut.axis = 2;
-        projectionMatrix = ProjectiomFromYAxis;
+        projectionMatrix = ProjectionFromYAxis;
     }
     else
     {
         geomOut.axis = 3;
-        projectionMatrix = ProjectiomFromZAxis;
+        projectionMatrix = ProjectionFromZAxis;
     }
     
     for(int i = 0; i < gl_in.length(); i++)

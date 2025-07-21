@@ -173,9 +173,9 @@ void Renderer::initializeVoxelTexture()
 	shaders[VOXELIZATION_SHADER].bind();
 
 	// uniforms in geometry shader
-	shaders[VOXELIZATION_SHADER].setUniformMatrix4fv("ProjectiomFromXAxis", projectionFromXAxis);
-	shaders[VOXELIZATION_SHADER].setUniformMatrix4fv("ProjectiomFromYAxis", projectionFromYAxis);
-	shaders[VOXELIZATION_SHADER].setUniformMatrix4fv("ProjectiomFromZAxis", projectionFromZAxis);
+	shaders[VOXELIZATION_SHADER].setUniformMatrix4fv("ProjectionFromXAxis", projectionFromXAxis);
+	shaders[VOXELIZATION_SHADER].setUniformMatrix4fv("ProjectionFromYAxis", projectionFromYAxis);
+	shaders[VOXELIZATION_SHADER].setUniformMatrix4fv("ProjectionFromZAxis", projectionFromZAxis);
 
 	// uniforms in fragment shader
 	shaders[VOXELIZATION_SHADER].setUniform1i("VoxelDimensions", voxelDimensions);

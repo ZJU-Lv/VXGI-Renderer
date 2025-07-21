@@ -66,5 +66,5 @@ private:
 	bool showDirect = true;
 	bool showIndirectDiffuse = true;
 	bool showIndirectSpecular = true;
-	bool showAmbientOcculision = true;
+	bool showAmbientOcculision = false;
 };
